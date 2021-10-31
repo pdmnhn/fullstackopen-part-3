@@ -23,6 +23,7 @@ let notes = [
 
 const app = express();
 
+app.use(express.static("build"));
 app.use(cors());
 app.use(express.json());
 app.get("/", (request, response) => {
@@ -41,6 +42,26 @@ app.get("/api/notes/:id", (request, response) => {
   } else {
     response.status(404).end();
   }
+});
+
+app.put("/api/notes/:id", (request, response) => {
+  const id = Number(request.params.id);
+  const body = request.body;
+  const updatedNote = notes.find((note) => note.id === id);
+  if (!updatedNote && !body.content) {
+    return response.status(400).end();
+  }
+  updatedNote.important = body.important || false;
+  updatedNote.date = new Date().toISOString();
+
+  notes.map((note) => {
+    if (note.id === id) {
+      return updatedNote;
+    } else {
+      return note;
+    }
+  });
+  response.json(updatedNote);
 });
 
 app.delete("/api/note/:id", (request, response) => {
